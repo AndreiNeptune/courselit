@@ -19,7 +19,7 @@ services:
 
             # In production, replace the following with the connection string of a cloud
             # hosted instance of MongoDB.
-            - DB_CONNECTION_STRING=mongodb://root:example@mongo/courselit?authSource=admin
+            - DB_CONNECTION_STRING=${DB_CONNECTION_STRING:-mongodb://root:example@mongo/courselit?authSource=admin}
             # Disable DB transactions for standalone mongo in compose (opt-out)
             - DB_TRANSACTIONS=false
 
@@ -95,8 +95,8 @@ services:
         image: mongo
         restart: always
         environment:
-            MONGO_INITDB_ROOT_USERNAME: root
-            MONGO_INITDB_ROOT_PASSWORD: example
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-example}
 
     # If you need to serve CourseLit on HTTPS, uncomment the following block to
     # enable the proxy server based on Caddy web server which comes with automatic
@@ -122,7 +122,7 @@ services:
     #   image: codelit/courselit-queue:latest
     #   environment:
     #     - NODE_ENV=production
-    #     - DB_CONNECTION_STRING=mongodb://root:example@mongo
+    #     - DB_CONNECTION_STRING=${DB_CONNECTION_STRING:-mongodb://root:example@mongo}
     #     # The following settings are required to actually send mails.
     #     - EMAIL_USER=${EMAIL_USER?'EMAIL_USER environment variable is not defined'}
     #     - EMAIL_PASS=${EMAIL_PASS?'EMAIL_PASS environment variable is not defined'}
@@ -156,7 +156,7 @@ services:
 
     #         # In production, replace the following with the connection string of a cloud
     #         # hosted instance of MongoDB.
-    #         - DB_CONNECTION_STRING=mongodb://root:example@mongo/medialit?authSource=admin
+    #         - DB_CONNECTION_STRING=${MEDIALIT_DB_CONNECTION_STRING:-mongodb://root:example@mongo/medialit?authSource=admin}
 
     #         # AWS S3 compatible storage configuration
     #         - CLOUD_ENDPOINT=${CLOUD_ENDPOINT?'CLOUD_ENDPOINT is required'}
