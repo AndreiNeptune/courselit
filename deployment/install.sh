@@ -37,11 +37,14 @@ CONFIGHOME=/home/$USER/.config/${DOMAIN}
 function generate_config () {
 # Generate random username and password for database
 AUTH_SECRET=$(tr -dc 'a-z' </dev/urandom | head -c 10)
+MONGO_PASSWORD=$(tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 16)
 
 mkdir -p $CONFIGHOME
 
 cat > $CONFIGHOME/.env <<EOF
-DB_CONNECTION_STRING=replace-this-with-a-mongodb-connection-string
+MONGO_INITDB_ROOT_USERNAME=root
+MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
+DB_CONNECTION_STRING=mongodb://root:${MONGO_PASSWORD}@mongo/courselit?authSource=admin
 AUTH_SECRET=$AUTH_SECRET
 TAG=latest
 
@@ -55,10 +58,9 @@ EMAIL_FROM=from
 #MEDIALIT_APIKEY=apikey-to-access-the-medialit-server
 EOF
 
-# Download necessary files
-wget \
-    https://raw.githubusercontent.com/codelitdev/courselit/master/deployment/docker/docker-compose.yml \
-    -P $CONFIGHOME
+# Copy necessary files from the local repository
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cp "$SCRIPT_DIR/docker/docker-compose.yml" "$CONFIGHOME/"
 }
 
 function setup_ssl_multitenant () {
