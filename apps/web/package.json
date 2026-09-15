@@ -6,7 +6,7 @@
         "openapi:generate": "node ./openapi/generate-openapi.mjs",
         "prebuild": "pnpm run openapi:generate",
         "dev": "next dev",
-        "build": "next build",
+        "build": "pnpm --filter \"@courselit/web^...\" build && next build",
         "start": "next start",
         "prettier": "prettier --write **/*.ts"
     },
