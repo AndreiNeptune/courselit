@@ -200,9 +200,9 @@ export default function LoginForm({
             <div className="flex flex-col gap-4 min-h-[80vh]">
                 <div className="flex justify-center grow items-center px-4 mx-auto lg:max-w-[1200px] w-full">
                     <div className="flex flex-col gap-4">
-                        {siteinfo.logins?.includes(
-                            Constants.LoginProvider.EMAIL,
-                        ) && (
+                        {(
+                            siteinfo.logins || [Constants.LoginProvider.EMAIL]
+                        ).includes(Constants.LoginProvider.EMAIL) && (
                             <>
                                 {error && (
                                     <div
