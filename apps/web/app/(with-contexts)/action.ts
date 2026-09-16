@@ -8,14 +8,16 @@ import { Types } from "mongoose";
 import { headers } from "next/headers";
 
 export async function getProfile(): Promise<Profile | null> {
+    const reqHeaders = await headers();
     const session = await auth.api.getSession({
-        headers: await headers(),
+        headers: reqHeaders,
     });
     if (!session) {
         return null;
     }
 
-    const domainId = (session?.session as any)?.domainId;
+    const domainId =
+        (session?.session as any)?.domainId || reqHeaders.get("domainId");
     const userId = (session?.user as any)?.userId;
 
     try {
