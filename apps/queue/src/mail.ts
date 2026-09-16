@@ -26,7 +26,12 @@ export async function sendMail({
     const transportMode =
         process.env.NODE_ENV === "production" ? "smtp" : "console";
 
-    await transporter.sendMail({ from, to, subject, html, headers });
+    if (process.env.NODE_ENV === "production") {
+        await transporter.sendMail({ from, to, subject, html, headers });
+    } else {
+        // eslint-disable-next-line no-console
+        console.log("Mail sent", from, to, subject, html, headers, new Date());
+    }
 
     logInfo("Mail sent", {
         source: "mail.send",
