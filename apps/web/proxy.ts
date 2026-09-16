@@ -41,7 +41,8 @@ export async function proxy(request: NextRequest) {
         const response = await fetch(`${backend}/verify-domain`);
 
         if (!response.ok) {
-            throw new Error();
+            const text = await response.text();
+            throw new Error(`HTTP ${response.status}: ${text}`);
         }
 
         const resp = await response.json();
