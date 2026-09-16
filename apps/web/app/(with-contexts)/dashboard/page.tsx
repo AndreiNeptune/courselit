@@ -11,7 +11,7 @@ export default async function Page() {
         redirect("/login");
     }
 
-    if (checkPermission(profile?.permissions, ADMIN_PERMISSIONS)) {
+    if (checkPermission(profile?.permissions || [], ADMIN_PERMISSIONS)) {
         redirect("/dashboard/overview");
     } else {
         redirect("/dashboard/my-content");

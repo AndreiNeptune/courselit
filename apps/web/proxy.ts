@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getBackendAddress } from "@/app/actions";
-import { auth } from "./auth";
 import { COURSE_VIEWER_CURRENT_URL_HEADER } from "./lib/course-viewer-session-params";
 
 export async function proxy(request: NextRequest) {
@@ -88,10 +87,11 @@ export async function proxy(request: NextRequest) {
         }
 
         if (request.nextUrl.pathname.startsWith("/dashboard")) {
-            const session = await auth.api.getSession({
-                headers: requestHeaders,
-            });
-            if (!session) {
+            const hasSessionCookie =
+                request.cookies.has("courselit.session_token") ||
+                request.cookies.has("better-auth.session_token");
+
+            if (!hasSessionCookie) {
                 return NextResponse.redirect(
                     new URL(
                         `/login?redirect=${encodeURIComponent(

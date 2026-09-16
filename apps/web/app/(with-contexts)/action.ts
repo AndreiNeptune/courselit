@@ -20,6 +20,10 @@ export async function getProfile(): Promise<Profile | null> {
         (session?.session as any)?.domainId || reqHeaders.get("domainId");
     const userId = (session?.user as any)?.userId;
 
+    if (!userId) {
+        return null;
+    }
+
     try {
         const user = await getUser(userId, {
             user: {
