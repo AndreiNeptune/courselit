@@ -37,14 +37,20 @@ export async function proxy(request: NextRequest) {
     }
 
     try {
-        const response = await fetch(`${backend}/verify-domain`);
-
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`HTTP ${response.status}: ${text}`);
+        let resp: any;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const response = await fetch(`${backend}/verify-domain`);
+            if (!response.ok) {
+                if (attempt === 2) {
+                    const text = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                }
+                await new Promise((r) => setTimeout(r, 500));
+                continue;
+            }
+            resp = await response.json();
+            break;
         }
-
-        const resp = await response.json();
 
         requestHeaders.set("domain", resp.domain);
         requestHeaders.set("domainId", resp.domainId);

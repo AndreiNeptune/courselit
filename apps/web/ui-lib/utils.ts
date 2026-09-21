@@ -17,6 +17,22 @@ import { Theme } from "@courselit/page-models";
 export { getPlanPrice } from "@courselit/utils";
 const { permissions } = UIConstants;
 
+async function fetchWithRetry<T>(
+    fn: () => Promise<T>,
+    retries = 2,
+    delayMs = 500,
+): Promise<T> {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            return await fn();
+        } catch (e) {
+            if (attempt === retries) throw e;
+            await new Promise((r) => setTimeout(r, delayMs));
+        }
+    }
+    throw new Error("fetchWithRetry: unreachable");
+}
+
 export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export const formattedLocaleDate = (
@@ -122,13 +138,15 @@ export const getPage = cache(
     }
     `;
         try {
-            const fetch = new FetchBuilder()
-                .setUrl(`${backend}/api/graph`)
-                .setPayload(query)
-                .setIsGraphQLEndpoint(true)
-                .build();
-            const response = await fetch.exec();
-            return response.page;
+            return await fetchWithRetry(async () => {
+                const fetch = new FetchBuilder()
+                    .setUrl(`${backend}/api/graph`)
+                    .setPayload(query)
+                    .setIsGraphQLEndpoint(true)
+                    .build();
+                const response = await fetch.exec();
+                return response.page;
+            });
         } catch (e: any) {
             console.log("getPage", e.message); // eslint-disable-line no-console
         }
@@ -166,13 +184,15 @@ export const getSiteInfo = cache(
         }
     `;
         try {
-            const fetch = new FetchBuilder()
-                .setUrl(`${backend}/api/graph`)
-                .setPayload(query)
-                .setIsGraphQLEndpoint(true)
-                .build();
-            const response = await fetch.exec();
-            return response.site.settings;
+            return await fetchWithRetry(async () => {
+                const fetch = new FetchBuilder()
+                    .setUrl(`${backend}/api/graph`)
+                    .setPayload(query)
+                    .setIsGraphQLEndpoint(true)
+                    .build();
+                const response = await fetch.exec();
+                return response.site.settings;
+            });
         } catch (e: any) {
             console.log("getSiteInfo", e.message); // eslint-disable-line no-console
         }
@@ -233,20 +253,22 @@ export const getFullSiteSetup = cache(
         }
 
         try {
-            const response = await fetch.exec();
-            const transformedTheme: Theme = {
-                id: response.theme.themeId,
-                name: response.theme.name,
-                theme: response.theme.theme,
-            };
-            return {
-                settings,
-                theme: transformedTheme,
-                page: response.page,
-                features: response.features,
-            };
+            return await fetchWithRetry(async () => {
+                const response = await fetch.exec();
+                const transformedTheme: Theme = {
+                    id: response.theme.themeId,
+                    name: response.theme.name,
+                    theme: response.theme.theme,
+                };
+                return {
+                    settings,
+                    theme: transformedTheme,
+                    page: response.page,
+                    features: response.features,
+                };
+            });
         } catch (e: any) {
-            console.log("getSiteInfo", e.message); // eslint-disable-line no-console
+            console.log("getFullSiteSetup", e.message); // eslint-disable-line no-console
             return undefined;
         }
     },
